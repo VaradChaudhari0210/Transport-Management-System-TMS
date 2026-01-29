@@ -1,0 +1,89 @@
+// This is your Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      Role     @default(EMPLOYEE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  shipmentsCreated Shipment[] @relation("CreatedBy")
+  shipmentsUpdated Shipment[] @relation("UpdatedBy")
+}
+
+enum Role {
+  ADMIN
+  EMPLOYEE
+}
+
+model Shipment {
+  id                   String           @id @default(uuid())
+  shipperName          String
+  carrierName          String
+  pickupLocation       String
+  pickupDate           String
+  deliveryLocation     String
+  deliveryDate         String
+  status               ShipmentStatus   @default(PENDING)
+  priority             ShipmentPriority @default(MEDIUM)
+  trackingNumber       String           @unique
+  rate                 Float
+  weight               Float
+  dimensions           String
+  specialInstructions  String?
+  flagged              Boolean          @default(false)
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+
+  createdBy            User?            @relation("CreatedBy", fields: [createdById], references: [id])
+  createdById          String?
+  
+  updatedBy            User?            @relation("UpdatedBy", fields: [updatedById], references: [id])
+  updatedById          String?
+
+  trackingEvents       TrackingEvent[]
+
+  @@index([status])
+  @@index([priority])
+  @@index([createdAt])
+}
+
+enum ShipmentStatus {
+  PENDING
+  IN_TRANSIT
+  DELIVERED
+  CANCELLED
+  DELAYED
+}
+
+enum ShipmentPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model TrackingEvent {
+  id          String   @id @default(uuid())
+  timestamp   String
+  location    String
+  status      String
+  description String
+  createdAt   DateTime @default(now())
+
+  shipment    Shipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  shipmentId  String
+
+  @@index([shipmentId])
+}
