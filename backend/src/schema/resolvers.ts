@@ -203,14 +203,13 @@ export const resolvers = {
         throw new Error('Invalid credentials');
       }
 
-      const token = generateToken(user.id, user.email, user.role);
+      const token = generateToken(user.id, user.email, user.name, user.role);
 
       return {
         token,
         user,
       };
     },
-          const token = generateToken(user.id, user.email, user.name, user.role);
     register: async (
       _: any,
       args: { email: string; password: string; name: string },
@@ -235,14 +234,13 @@ export const resolvers = {
         },
       });
 
-      const token = generateToken(user.id, user.email, user.role);
+      const token = generateToken(user.id, user.email, user.name, user.role);
 
       return {
         token,
         user,
       };
     },
-          const token = generateToken(user.id, user.email, user.name, user.role);
     // Authenticated mutations
     createShipment: async (_: any, args: { input: any }, context: Context) => {
       requireAuth(context.auth);
